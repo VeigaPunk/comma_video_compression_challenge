@@ -8,6 +8,7 @@ import hashlib
 import json
 import math
 import re
+import shutil
 import subprocess
 import zipfile
 from pathlib import Path
@@ -45,6 +46,12 @@ EXPECTED = {
         "encoder/selector_payload.bin",
         "encoder/polished_latent_raw.bin",
     ],
+    "runtime": {
+        "python": "3.11.15",
+        "uv": "0.11.29",
+        "git_lfs": "git-lfs/3.7.1",
+        "ffmpeg": "n8.1.2",
+    },
 }
 
 
@@ -55,7 +62,7 @@ def parse_metric(path: Path, label: str) -> float | None:
     if label == "Final score":
         match = re.search(rf"{re.escape(label)}[^=]*=\s*([0-9.]+)", text)
     else:
-        match = re.search(rf"{re.escape(label)}:\s*([0-9.]+)", text)
+        match = re.search(rf"{re.escape(label)}:\\s*([0-9.]+)", text)
     return float(match.group(1)) if match else None
 
 
@@ -78,12 +85,54 @@ def member_sha(archive: Path) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def verify_source_ref(expected: str) -> bool:
+def run_cmd(*args: str) -> str:
+    return subprocess.check_output(args, text=True).strip()
+
+
+def verify_source_ref(expected: str) -> tuple[bool, str]:
     try:
-        got = subprocess.check_output(["git", "rev-parse", "--verify", expected], text=True).strip()
-        return got.startswith(expected)
+        kind = run_cmd("git", "cat-file", "-t", expected)
     except Exception:
-        return False
+        return False, ""
+    if kind != "commit":
+        return False, kind
+    try:
+        run_cmd("git", "cat-file", "-e", f"{expected}^{{commit}}")
+        return True, kind
+    except Exception:
+        return False, kind
+
+
+def verify_runtime(expected: dict[str, str]) -> tuple[bool, dict[str, str | None]]:
+    observed: dict[str, str | None] = {}
+
+    def pick(cmd: list[str], pattern: str) -> str | None:
+        try:
+            text = run_cmd(*cmd)
+            m = re.search(pattern, text)
+            return m.group(1) if m else None
+        except Exception:
+            return None
+
+    observed["python"] = pick(["python", "--version"], r"Python\s+([0-9]+\.[0-9]+\.[0-9]+)")
+    observed["uv"] = pick(["uv", "--version"], r"uv\s+([0-9]+\.[0-9]+\.[0-9]+)")
+    observed["git_lfs"] = pick(
+        ["git", "lfs", "version"], r"(git-lfs/[0-9]+\.[0-9]+\.[0-9]+)"
+    )
+    observed["ffmpeg"] = pick(["ffmpeg", "-version"], r"ffmpeg version\s+([a-zA-Z0-9._-]+)")
+
+    ok = True
+    for key, expected_value in expected.items():
+        got = observed.get(key)
+        if got != expected_value:
+            ok = False
+            print(f"runtime_mismatch {key} expected={expected_value} actual={got}")
+
+    if not shutil.which("git"):
+        print("runtime_mismatch git command missing")
+        ok = False
+
+    return ok, observed
 
 
 def parse_args() -> argparse.Namespace:
@@ -93,6 +142,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--archive-sha", default=EXPECTED["archive_sha"], help="Expected archive SHA-256")
     p.add_argument("--member-sha", default=EXPECTED["member_sha"], help="Expected archive member SHA-256")
     p.add_argument("--output", default=".evidence/m02_reference_manifest.json", help="Manifest output")
+    p.add_argument(
+        "--require-runtime",
+        action="store_true",
+        help="Require runtime identity checks against pinned versions.",
+    )
     return p.parse_args()
 
 
@@ -103,21 +157,29 @@ def main() -> int:
         print(f"missing submission_dir: {root}")
         return 1
 
+    source_ok, source_type = verify_source_ref(args.source)
+
     results = {
         "mission": "M02",
         "submission_dir": str(root),
         "source_ref": args.source,
-        "source_ref_match": verify_source_ref(args.source),
+        "source_ref_type": source_type,
+        "source_ref_match": source_ok,
         "expected_archive_sha": args.archive_sha,
         "expected_member_sha": args.member_sha,
         "files": {},
         "metrics": {},
+        "runtime": {
+            "pinned": EXPECTED["runtime"],
+            "observed": {},
+            "match": True,
+        },
         "status": "pass",
     }
 
-    if not results["source_ref_match"]:
+    if not source_ok:
         results["status"] = "fail"
-        print(f"source_ref_missing: {args.source}")
+        print(f"source_ref_invalid: {args.source} type={source_type}")
 
     missing = []
     for rel in EXPECTED["required_files"]:
@@ -146,6 +208,13 @@ def main() -> int:
             print(f"archive_invalid: {exc}")
     else:
         results["status"] = "fail"
+
+    if args.require_runtime:
+        runtime_ok, runtime_observed = verify_runtime(EXPECTED["runtime"])
+        results["runtime"]["observed"] = runtime_observed
+        results["runtime"]["match"] = runtime_ok
+        if not runtime_ok:
+            results["status"] = "fail"
 
     report_cpu = root / "report_cpu.txt"
     pose = parse_metric(report_cpu, "Average PoseNet Distortion")
