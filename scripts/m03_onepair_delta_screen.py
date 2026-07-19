@@ -91,6 +91,17 @@ def ensure_runtime_env() -> None:
         raise RuntimeError("ffmpeg missing")
 
 
+def ensure_runtime_deps() -> None:
+    from importlib.util import find_spec
+
+    missing = []
+    for name in ("numpy", "torch"):
+        if find_spec(name) is None:
+            missing.append(name)
+    if missing:
+        raise RuntimeError(f"missing python deps: {', '.join(missing)}")
+
+
 def module_path(submission_dir: Path) -> Path:
     return submission_dir.resolve()
 
@@ -305,6 +316,7 @@ def emit_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
 def main() -> int:
     args = parse_args()
     ensure_runtime_env()
+    ensure_runtime_deps()
 
     submission = Path(args.submission_dir).resolve()
     dims = parse_int_csv(args.dims)
