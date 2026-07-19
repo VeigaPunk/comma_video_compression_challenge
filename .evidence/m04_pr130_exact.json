@@ -1,0 +1,53 @@
+{
+  "archive_sha256": "0491d5df84fc70b62b3f7ccf8894f5e1b81c616de46a052e4423fc1e18fdc7cd",
+  "cardinality": {
+    "ground_truth_frames": 1200,
+    "inflated": {
+      "bytes": 3662409600,
+      "frames": 1200,
+      "pairs": 600,
+      "raw_shape": [
+        1200,
+        874,
+        1164,
+        3
+      ],
+      "sha256": "bc3c6b6092ae26f76ef375ce9314d1270ad57380341608f6dc5b43467cf9c650"
+    }
+  },
+  "limits": {
+    "max_runtime_seconds": 1800,
+    "max_score": 0.187
+  },
+  "metrics": {
+    "archive_bytes": 191052,
+    "final": 0.17076926565506415,
+    "pose": 1.94819294847548e-05,
+    "rate": 0.005088547388475883,
+    "samples": 600,
+    "seg": 0.0002959781268145889,
+    "uncompressed_bytes": 37545489
+  },
+  "official_evaluate_sh_sha256": "9612284ce6e9585aefcf636f3027808a56160ffd572edffdf4b8622a65fac917",
+  "official_evaluator_sha256": "7da71a84ce24286bc6b583470f9bbd25c998971da301320d0d4e9d6fd40baa4b",
+  "official_run": {
+    "metrics": {
+      "archive_bytes": 191052,
+      "final": 0.17,
+      "pose": 1.948e-05,
+      "rate": 0.00508855,
+      "samples": 600,
+      "seg": 0.00029598,
+      "uncompressed_bytes": 37545489
+    },
+    "wall_seconds": 142.0979006879934
+  },
+  "precision_transform": "three .8f and one .2f report formats replaced by .17g; executable statements unchanged",
+  "runtime_seconds": 181.40392018099374,
+  "schema": "m04-official-evaluator-proof-v1",
+  "source": {
+    "ref": "refs/remotes/upstream/pr/130",
+    "sha": "4ea9513451a0bc375faa84c97b8820410fefe918",
+    "tracked_tree_matches": true
+  }
+}

@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from scripts.m04_evaluate_proof import (
+    OFFICIAL_EVALUATE_SH_SHA256,
     OFFICIAL_EVALUATOR_SHA256,
     assert_exact_raw,
     full_precision_source,
@@ -17,6 +18,8 @@ class OfficialEvaluatorProofTest(unittest.TestCase):
     def test_official_evaluator_is_byte_exact(self):
         source = (ROOT / "evaluate.py").read_bytes()
         self.assertEqual(hashlib.sha256(source).hexdigest(), OFFICIAL_EVALUATOR_SHA256)
+        shell = (ROOT / "evaluate.sh").read_bytes()
+        self.assertEqual(hashlib.sha256(shell).hexdigest(), OFFICIAL_EVALUATE_SH_SHA256)
 
     def test_precision_transform_only_changes_result_formats(self):
         official = (ROOT / "evaluate.py").read_text(encoding="utf-8")
