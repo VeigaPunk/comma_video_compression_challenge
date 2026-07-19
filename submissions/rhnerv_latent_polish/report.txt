@@ -1,0 +1,17 @@
+=== Evaluation config ===
+  batch_size: 16
+  device: cpu
+  num_threads: 2
+  prefetch_queue_depth: 4
+  report: submissions/pr128_reference/rhnerv_latent_polish/report.txt
+  seed: 1234
+  submission_dir: submissions/pr128_reference/rhnerv_latent_polish
+  uncompressed_dir: /home/vhpnk/Work/comma-leaderboard/video-compression/videos
+  video_names_file: /home/vhpnk/Work/comma-leaderboard/video-compression/public_test_video_names.txt
+=== Evaluation results over 600 samples ===
+  Average PoseNet Distortion: 0.00002937
+  Average SegNet Distortion: 0.00053279
+  Submission file size: 176,531 bytes
+  Original uncompressed size: 37,545,489 bytes
+  Compression Rate: 0.00470179
+  Final score: 100*segnet_dist + √(10*posenet_dist) + 25*rate = 0.19

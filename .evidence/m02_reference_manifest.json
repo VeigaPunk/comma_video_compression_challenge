@@ -1,0 +1,35 @@
+{
+  "archive_sha": "6d11284b051540be190b2613e615edad4efec7fddbfc627000d0d5fd0bd3f859",
+  "files": {
+    "LICENSE": true,
+    "METHOD.md": true,
+    "README.md": true,
+    "THIRD_PARTY_NOTICES.md": true,
+    "archive.zip": true,
+    "codec.py": true,
+    "codec_ctx.py": true,
+    "compress.py": true,
+    "compress.sh": true,
+    "encoder/decoder_streams.bin": true,
+    "encoder/polished_latent_raw.bin": true,
+    "encoder/selector_payload.bin": true,
+    "expected_output.sha256": true,
+    "frame_selector.py": true,
+    "inflate.py": true,
+    "inflate.sh": true,
+    "model.py": true,
+    "report_cpu.txt": true
+  },
+  "member_sha": "2687049683aae7848bc9d0a23feb8809efe7875d8cf0ba34e58f41ab538f7827",
+  "metrics": {
+    "final": 0.19,
+    "pose": 2.937e-05,
+    "pose_expected": 2.937e-05,
+    "seg": 0.00053263,
+    "seg_expected": 0.00053263
+  },
+  "mission": "M02",
+  "source_ref_match": true,
+  "status": "pass",
+  "submission_dir": "submissions/rhnerv_latent_polish"
+}
