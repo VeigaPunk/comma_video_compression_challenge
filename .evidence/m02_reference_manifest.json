@@ -1,5 +1,7 @@
 {
   "archive_sha": "6d11284b051540be190b2613e615edad4efec7fddbfc627000d0d5fd0bd3f859",
+  "expected_archive_sha": "6d11284b051540be190b2613e615edad4efec7fddbfc627000d0d5fd0bd3f859",
+  "expected_member_sha": "2687049683aae7848bc9d0a23feb8809efe7875d8cf0ba34e58f41ab538f7827",
   "files": {
     "LICENSE": true,
     "METHOD.md": true,
@@ -22,13 +24,18 @@
   },
   "member_sha": "2687049683aae7848bc9d0a23feb8809efe7875d8cf0ba34e58f41ab538f7827",
   "metrics": {
-    "final": 0.19,
+    "calculated_final": 0.18794542778901213,
+    "final_expected": 0.187946,
     "pose": 2.937e-05,
     "pose_expected": 2.937e-05,
+    "rate": 0.00470179,
+    "rate_expected": 0.00470179,
+    "reported_final_rounded": 0.19,
     "seg": 0.00053263,
     "seg_expected": 0.00053263
   },
   "mission": "M02",
+  "source_ref": "5a6cdcbdbabcef8b7c5682c861e5689783d4587c",
   "source_ref_match": true,
   "status": "pass",
   "submission_dir": "submissions/rhnerv_latent_polish"

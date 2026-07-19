@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import re
 import subprocess
 import zipfile
@@ -105,11 +106,18 @@ def main() -> int:
     results = {
         "mission": "M02",
         "submission_dir": str(root),
+        "source_ref": args.source,
         "source_ref_match": verify_source_ref(args.source),
+        "expected_archive_sha": args.archive_sha,
+        "expected_member_sha": args.member_sha,
         "files": {},
         "metrics": {},
         "status": "pass",
     }
+
+    if not results["source_ref_match"]:
+        results["status"] = "fail"
+        print(f"source_ref_missing: {args.source}")
 
     missing = []
     for rel in EXPECTED["required_files"]:
@@ -142,13 +150,38 @@ def main() -> int:
     report_cpu = root / "report_cpu.txt"
     pose = parse_metric(report_cpu, "Average PoseNet Distortion")
     seg = parse_metric(report_cpu, "Average SegNet Distortion")
+    rate = parse_metric(report_cpu, "Compression Rate")
+    calculated_final = (
+        100 * seg + math.sqrt(10 * pose) + 25 * rate
+        if pose is not None and seg is not None and rate is not None
+        else None
+    )
     results["metrics"] = {
         "pose": pose,
         "seg": seg,
-        "final": parse_metric(report_cpu, "Final score"),
+        "rate": rate,
+        "reported_final_rounded": parse_metric(report_cpu, "Final score"),
+        "calculated_final": calculated_final,
         "pose_expected": EXPECTED["expected_metrics"]["pose"],
         "seg_expected": EXPECTED["expected_metrics"]["seg"],
+        "rate_expected": EXPECTED["expected_metrics"]["rate"],
+        "final_expected": EXPECTED["expected_metrics"]["final"],
     }
+    metric_tolerances = {"pose": 1e-12, "seg": 1e-12, "rate": 1e-12}
+    for name, tolerance in metric_tolerances.items():
+        actual = results["metrics"][name]
+        expected = EXPECTED["expected_metrics"][name]
+        if actual is None or not math.isclose(actual, expected, rel_tol=0, abs_tol=tolerance):
+            results["status"] = "fail"
+            print(f"metric_mismatch {name} expected={expected} actual={actual}")
+    if calculated_final is None or not math.isclose(
+        calculated_final, EXPECTED["expected_metrics"]["final"], rel_tol=0, abs_tol=1e-6
+    ):
+        results["status"] = "fail"
+        print(
+            "metric_mismatch final "
+            f"expected={EXPECTED['expected_metrics']['final']} actual={calculated_final}"
+        )
 
     manifest = Path(args.output)
     manifest.parent.mkdir(parents=True, exist_ok=True)
