@@ -34,7 +34,7 @@ m04 local qualification: pass
 ## Out-of-scope
 - Official GitHub `linux-nvidia-t4` qualification remains pending; local RTX 5070 qualification does not replace that hardware-specific gate (`submissions/semantic_pose_landslide_selfcompress/verification.json:248-259`; `submissions/semantic_pose_landslide_selfcompress/README.md:130-133,173-186`).
 - No duplicate upstream PR is opened: PR #130 is already open under Fesal Fayed's `fesalfayed/agent/semantic-pose-landslide-selfcompress`, while this mission has no evidence resolving eligibility or author authorization for a duplicate (GitHub PR query, direct quote: `"author" ... "login":"fesalfayed"`, `"state":"OPEN"`, `"statusCheckRollup":[]`; PR #130).
-- Untracked `scripts/m04_round4_search.py` is deliberately left untracked and unstaged. It is stale and unneeded after PR #130 qualified, and its worsening path increments `full_count` without running a full qualification (`scripts/m04_round4_search.py:377-381`); no submission, evaluator, dependency lock, plan, or upstream ref is changed.
+- The stale, untracked `scripts/m04_round4_search.py` from the aborted selector lane was removed after review; its worsening path incremented `full_count` without running a full qualification. No tracked submission, evaluator, dependency lock, plan, or upstream ref was changed by that cleanup.
 
 ## Findings
 
@@ -87,3 +87,9 @@ All metric, runtime, cardinality, source, and output values above are transcribe
 - PR: https://github.com/commaai/comma_video_compression_challenge/pull/130
 - Previous: `docs/reports/video-compression-r3-2026-07-19.md`
 - Next: M05 — official T4/eligibility resolution only; no duplicate PR
+
+## M05 escalation
+
+- Independent local reproduction evidence was posted to PR #130 at https://github.com/commaai/comma_video_compression_challenge/pull/130#issuecomment-5016978941, including the exact score, 600-sample cardinality, runtime, source/archive/output identities, and successful local `constriction 0.5.0` result.
+- A direct dispatch of the repository's `eval` workflow for PR #130 on `linux-nvidia-t4` was attempted with the canonical submission name and release URL. GitHub rejected it with `HTTP 403: Must have admin rights to Repository`.
+- The remaining blocker is therefore external and explicit: a commaai maintainer must dispatch the challenge-owned T4 workflow. No duplicate submission or authorship claim was created.
