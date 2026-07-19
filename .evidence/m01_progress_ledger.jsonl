@@ -1,0 +1,2 @@
+{"ts_utc": "2026-07-19T17:00:55Z", "mission": "M01", "event": "m01.started", "status": "ok", "branch": "mission/M01", "commit": "d3f688f84f555c5aaebee7d2c4203efc8a9051e2", "notes": "Branch setup and helper files added"}
+{"ts_utc": "2026-07-19T17:00:55Z", "mission": "M01", "event": "m01.verify", "status": "failed", "branch": "mission/M01", "commit": "d3f688f84f555c5aaebee7d2c4203efc8a9051e2", "notes": "remote sha check pending"}
