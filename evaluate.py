@@ -92,12 +92,12 @@ def main():
       score = 100 * segnet_dist +  math.sqrt(posenet_dist * 10)  + 25 * rate
       printed_results = [
         f"=== Evaluation results over {batch_sizes:.0f} samples ===",
-        f"  Average PoseNet Distortion: {posenet_dist:.12f}",
-        f"  Average SegNet Distortion: {segnet_dist:.12f}",
+        f"  Average PoseNet Distortion: {posenet_dist:.8f}",
+        f"  Average SegNet Distortion: {segnet_dist:.8f}",
         f"  Submission file size: {compressed_size:,} bytes",
         f"  Original uncompressed size: {uncompressed_size:,} bytes",
-        f"  Compression Rate: {rate:.12f}",
-        f"  Final score: 100*segnet_dist + √(10*posenet_dist) + 25*rate = {score:.12f}"
+        f"  Compression Rate: {rate:.8f}",
+        f"  Final score: 100*segnet_dist + √(10*posenet_dist) + 25*rate = {score:.2f}"
       ]
       print("\n".join(printed_results))
       with open(args.report, "w") as f:
