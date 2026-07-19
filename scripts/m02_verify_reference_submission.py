@@ -10,6 +10,7 @@ import math
 import re
 import shutil
 import subprocess
+import sys
 import zipfile
 from pathlib import Path
 
@@ -52,6 +53,14 @@ EXPECTED = {
         "git_lfs": "git-lfs/3.7.1",
         "ffmpeg": "n8.1.2",
     },
+    "lfs_oids": {
+        "models/posenet.safetensors": "0f3a0874c5c387f990d7b88bd1d7e1f6de35d98b45f2a289989db2c77b9b6576",
+        "models/segnet.safetensors": "68956e328d4c5d875389a1a444870e6bac1c052c9986123827af95c07c6991b6",
+        "submissions/rhnerv_latent_polish/encoder/decoder_streams.bin": "83598024bdb4d60463610db23934cdee60c3b6a81158a97e0dd55ea621833fcd",
+        "submissions/rhnerv_latent_polish/encoder/polished_latent_raw.bin": "af58e8ace2815288570dd295bb4f7858fb2ac3aa47f81029b9c7b2673984bf22",
+        "submissions/rhnerv_latent_polish/encoder/selector_payload.bin": "fc5c431b5d793c33e2f320076fe6f0dd76c2d91e3826ae4b05abfb4f86f453ca",
+        "videos/0.mkv": "2611f5f3e186f3529777749f97bd4cce3a208d6b3559e137bd45d256980d2fa9",
+    },
 }
 
 
@@ -62,7 +71,7 @@ def parse_metric(path: Path, label: str) -> float | None:
     if label == "Final score":
         match = re.search(rf"{re.escape(label)}[^=]*=\s*([0-9.]+)", text)
     else:
-        match = re.search(rf"{re.escape(label)}:\\s*([0-9.]+)", text)
+        match = re.search(rf"{re.escape(label)}:\s*([0-9.]+)", text)
     return float(match.group(1)) if match else None
 
 
@@ -86,10 +95,12 @@ def member_sha(archive: Path) -> str:
 
 
 def run_cmd(*args: str) -> str:
-    return subprocess.check_output(args, text=True).strip()
+    return subprocess.check_output(args, text=True, stderr=subprocess.PIPE).strip()
 
 
 def verify_source_ref(expected: str) -> tuple[bool, str]:
+    if re.fullmatch(r"[0-9a-fA-F]{40}", expected) is None:
+        return False, "invalid_sha"
     try:
         kind = run_cmd("git", "cat-file", "-t", expected)
     except Exception:
@@ -103,6 +114,23 @@ def verify_source_ref(expected: str) -> tuple[bool, str]:
         return False, kind
 
 
+def verify_lfs_oids(expected: dict[str, str]) -> tuple[bool, dict[str, str]]:
+    """Bind tracked LFS paths to their committed object identities."""
+    try:
+        output = run_cmd("git", "lfs", "ls-files", "--long")
+    except Exception:
+        return False, {}
+
+    observed: dict[str, str] = {}
+    for line in output.splitlines():
+        match = re.fullmatch(r"([0-9a-f]{64})\s+[-*]\s+(.+)", line)
+        if match:
+            observed[match.group(2)] = match.group(1)
+
+    selected = {path: observed.get(path, "") for path in expected}
+    return selected == expected, selected
+
+
 def verify_runtime(expected: dict[str, str]) -> tuple[bool, dict[str, str | None]]:
     observed: dict[str, str | None] = {}
 
@@ -114,7 +142,7 @@ def verify_runtime(expected: dict[str, str]) -> tuple[bool, dict[str, str | None
         except Exception:
             return None
 
-    observed["python"] = pick(["python", "--version"], r"Python\s+([0-9]+\.[0-9]+\.[0-9]+)")
+    observed["python"] = re.match(r"([0-9]+\.[0-9]+\.[0-9]+)", sys.version).group(1)
     observed["uv"] = pick(["uv", "--version"], r"uv\s+([0-9]+\.[0-9]+\.[0-9]+)")
     observed["git_lfs"] = pick(
         ["git", "lfs", "version"], r"(git-lfs/[0-9]+\.[0-9]+\.[0-9]+)"
@@ -158,6 +186,7 @@ def main() -> int:
         return 1
 
     source_ok, source_type = verify_source_ref(args.source)
+    lfs_ok, lfs_observed = verify_lfs_oids(EXPECTED["lfs_oids"])
 
     results = {
         "mission": "M02",
@@ -165,6 +194,7 @@ def main() -> int:
         "source_ref": args.source,
         "source_ref_type": source_type,
         "source_ref_match": source_ok,
+        "source_verification": "full_sha_git_cat_file_commit_type",
         "expected_archive_sha": args.archive_sha,
         "expected_member_sha": args.member_sha,
         "files": {},
@@ -174,12 +204,21 @@ def main() -> int:
             "observed": {},
             "match": True,
         },
+        "lfs": {
+            "pinned": EXPECTED["lfs_oids"],
+            "observed": lfs_observed,
+            "match": lfs_ok,
+        },
         "status": "pass",
     }
 
     if not source_ok:
         results["status"] = "fail"
         print(f"source_ref_invalid: {args.source} type={source_type}")
+
+    if not lfs_ok:
+        results["status"] = "fail"
+        print("lfs_oid_mismatch")
 
     missing = []
     for rel in EXPECTED["required_files"]:

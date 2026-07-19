@@ -22,6 +22,25 @@
     "model.py": true,
     "report_cpu.txt": true
   },
+  "lfs": {
+    "match": true,
+    "observed": {
+      "models/posenet.safetensors": "0f3a0874c5c387f990d7b88bd1d7e1f6de35d98b45f2a289989db2c77b9b6576",
+      "models/segnet.safetensors": "68956e328d4c5d875389a1a444870e6bac1c052c9986123827af95c07c6991b6",
+      "submissions/rhnerv_latent_polish/encoder/decoder_streams.bin": "83598024bdb4d60463610db23934cdee60c3b6a81158a97e0dd55ea621833fcd",
+      "submissions/rhnerv_latent_polish/encoder/polished_latent_raw.bin": "af58e8ace2815288570dd295bb4f7858fb2ac3aa47f81029b9c7b2673984bf22",
+      "submissions/rhnerv_latent_polish/encoder/selector_payload.bin": "fc5c431b5d793c33e2f320076fe6f0dd76c2d91e3826ae4b05abfb4f86f453ca",
+      "videos/0.mkv": "2611f5f3e186f3529777749f97bd4cce3a208d6b3559e137bd45d256980d2fa9"
+    },
+    "pinned": {
+      "models/posenet.safetensors": "0f3a0874c5c387f990d7b88bd1d7e1f6de35d98b45f2a289989db2c77b9b6576",
+      "models/segnet.safetensors": "68956e328d4c5d875389a1a444870e6bac1c052c9986123827af95c07c6991b6",
+      "submissions/rhnerv_latent_polish/encoder/decoder_streams.bin": "83598024bdb4d60463610db23934cdee60c3b6a81158a97e0dd55ea621833fcd",
+      "submissions/rhnerv_latent_polish/encoder/polished_latent_raw.bin": "af58e8ace2815288570dd295bb4f7858fb2ac3aa47f81029b9c7b2673984bf22",
+      "submissions/rhnerv_latent_polish/encoder/selector_payload.bin": "fc5c431b5d793c33e2f320076fe6f0dd76c2d91e3826ae4b05abfb4f86f453ca",
+      "videos/0.mkv": "2611f5f3e186f3529777749f97bd4cce3a208d6b3559e137bd45d256980d2fa9"
+    }
+  },
   "member_sha": "2687049683aae7848bc9d0a23feb8809efe7875d8cf0ba34e58f41ab538f7827",
   "metrics": {
     "calculated_final": 0.18794542778901213,
@@ -35,8 +54,25 @@
     "seg_expected": 0.00053263
   },
   "mission": "M02",
+  "runtime": {
+    "match": true,
+    "observed": {
+      "ffmpeg": "n8.1.2",
+      "git_lfs": "git-lfs/3.7.1",
+      "python": "3.11.15",
+      "uv": "0.11.29"
+    },
+    "pinned": {
+      "ffmpeg": "n8.1.2",
+      "git_lfs": "git-lfs/3.7.1",
+      "python": "3.11.15",
+      "uv": "0.11.29"
+    }
+  },
   "source_ref": "5a6cdcbdbabcef8b7c5682c861e5689783d4587c",
   "source_ref_match": true,
+  "source_ref_type": "commit",
+  "source_verification": "full_sha_git_cat_file_commit_type",
   "status": "pass",
   "submission_dir": "submissions/rhnerv_latent_polish"
 }
